@@ -12,22 +12,27 @@ args = arg_parser.parse_args()
 app_manager = reactive.AppManager(srap, 'test')
 
 # Create the application
-def create_app(self):
+def create_app():
     
-    user_class = meta.Class('user')
+    user_class = meta.Class('User')
     # Properties are always private
-    user_id = meta.property('user_id', 'string', 'Unique identifier for this user')
-    login = meta.property('login', 'string', 'Login used by user')
-    encrypted_password = meta.property('encrypted_password', 'string', 'Encrypted password to authenticate login')
-    users = meta.collection('users', user_class)
+    user_id = meta.Property('user_id', 'string', 'Unique identifier for this user')
+    login = meta.Property('login', 'string', 'Login used by user')
+    encrypted_password = meta.Property('encrypted_password', 'string', 
+        'Encrypted password to authenticate login')
+    
+    user_class.properties += [user_id, login, encrypted_password]
 
-    event_args = [ login, encrypted_password ]
+    users = meta.Collection('Users', user_class)
+    user_class.default_collection = users
+
+    event_args = [login, encrypted_password]
     
     # Construct the meta process for handling this event
     # This is kinda Lua-ish
     event_process = [
         # Push a new user onto the stack
-        meta.create('user'),
+        meta.create('User'),
         #(or should it be like this?)
         #meta.create(-1) and have the top of the stack be the current class?
         # Generate the unique id of the user and push it onto the stack
@@ -41,19 +46,29 @@ def create_app(self):
         # and -2 (user object)
     ]
 
-    user_class.event_handler('create', 'user_created', event_args, event_process)
+    # user_created event, created by User.create()
+    user_class.class_event_handler('create', 'user_created', event_args, event_process)
 
-    client_class = meta.Class('client')
-    clients = meta.create_collection('clients', client_class)
+    client_class = meta.Class('Client')
+    clients = meta.Collection('Clients', client_class)
 
-    
-    clients = meta.Collection()
+    # client_connected event, created by Client.connect(ip_address, 
 
     # Create a new user
-    deferred = app_manager.db.execute('user create: login="{0}", encrypted_password="{1}"'.format(
-            'TestUser@anonymous.com', encrypt('test password')))
+    deferred = app_manager.db.User.create(login='TestUser@anonymous.com', encrypted_password=encrypt('Test password'))
 
+    #TODO Instead of a deferred, we should create something else that
+    # can support a timeout; I suppose for now we can use an errBack for timeouts.
+    deferred.addCallback(user_created)
+
+    # Here's where the procedural meets reactive
     
+
+def user_created(args):
+    user_id = args[0]
+    user = args[1]
+
+
 
 app_manager.call_later(10, create_app)
 

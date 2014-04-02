@@ -1,13 +1,14 @@
-pyzen-reactive
-==============
+Zen Reactive Platform - Reference Implementation
+=================================================
 
-Python reference implementation of the Zen Reactive Database, which 
-is a a reactive stateful event driven in-memory database.
+Python reference implementation of the Zen Reactive Platform, which 
+utilizes a reactive stateful event sourcing programming paradigm on top of
+an in-memory object oriented database.
 
-The purpose of this reference implementation is to help others
-understand the benefits of such a design with regards to Big Data,
-data mining, enterprise architecture, financial systems, social networks, 
-and a myriad of other applications.
+The purpose of this reference implementation is to help others understand 
+the benefits of such a design with regards to Big Data, data mining, 
+enterprise architecture, financial systems, social networks, and a myriad 
+of other applications.
 
 Why Python?
 -----------
@@ -26,13 +27,14 @@ More about Reactive
 --------------------
 
 Reactive programming is a declarative programming paradigm much like
-functional programming.  It's more suited for defining data flows.
+functional programming.  It's more suited for defining data flows, and
+unlike functional programming, Reactive objects are stateful.
 
-Unlike functional programming, Reactive objects are stateful.
+Reactive objects are not directly manipulated, but rather state transitions 
+and other object modifications and mutations are explicitly and exclusively 
+performed through the use of events.  This is known as Event Sourcing.
 
-State transitions and other object modifications and mutations are
-explicitly and exclusively performed through the use of events.  Contrast
-this with imperative style programming where data manipulation occurs
+Contrast this with imperative style programming where data manipulation occurs
 through the use of functions and methods.
 
 In Reactive, objects generally* are not persisted, but rather the events

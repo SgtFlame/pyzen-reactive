@@ -16,6 +16,7 @@ class DeferredImplementation(object):
     def __call__(self, *args, **kwargs):
         print('Calling {0} from {1} with args {2} and {3}'.format(self._name, 
             self._parent._name, args, kwargs))
-            
+
 db = DeferredImplementation()
-db.User.create(arg1=1, arg2=2)
+
+db.Users.doSomething(arg1=1, arg2=2)

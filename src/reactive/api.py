@@ -1,1 +1,2 @@
-from client import ReactiveClient
+from client import ReactiveClient, AppManager
+

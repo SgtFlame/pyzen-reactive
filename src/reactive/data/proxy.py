@@ -29,18 +29,21 @@ class DataProxy(ServiceProxy):
         args : dictionary
             Additional arguments to be passed to the class constructor.
         '''
+        raise RuntimeError('Not implemented')
         
 class ProxyObject(object):
-    def __init__(self, reactive):
+    def __init__(self, reactive, name):
         self._reactive = reactive
-        self._name = collection_name
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
 
 class CollectionProxy(ProxyObject):
 
     def __init__(self, reactive, collection_name, deferred=None):
-        super(CollectionProxy, self).super(reactive)
-        # Get the meta data for this collection
-        self._meta = self._reactive.meta.getCollection(collection_name)
+        super(CollectionProxy, self).__init__(reactive, collection_name)
         if deferred:
             deferred.addCallback(self._collection_created)
 
@@ -72,12 +75,10 @@ class CollectionProxy(ProxyObject):
 class ClassProxy(ProxyObject):
 
     def __init__(self, reactive, class_name, deferred=None):
-        super(ClassProxy, self).super(reactive)
-        self._class_name = class_name
+        super(ClassProxy, self).__init__(reactive, class_name)
         if deferred:
             deferred.addCallback(self._class_created)
-        
+
     def _class_created(self, response):
         # Not really anything to do here yet
-        pass
-        
+        print('Class {0} was created by the meta service.'.format(self.name))

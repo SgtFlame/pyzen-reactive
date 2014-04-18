@@ -1,13 +1,19 @@
 from zen.fabric.service_proxy import ServiceProxy
 from reactive.data.proxy import CollectionProxy, ClassProxy
+from reactive.api import reactive_func
 
 class MetaProxy(ServiceProxy):
 
-    def __init__(self, stack_name, container):
-        super(MetaProxy, self).__init__(container)
+    def __init__(self, stack_name, app_manager):
+        super(MetaProxy, self).__init__(app_manager.container)
+        self._reactive = app_manager.reactive
         self._stack_name = stack_name
         self._classes = {}
         self._collections = {}
+
+    @property
+    def reactive(self):
+        return self._reactive
 
     @property
     def path(self):
@@ -47,11 +53,12 @@ class MetaProxy(ServiceProxy):
                         'update' : update,
                     }
         }
-        meta_responded = self._container.send_request(request)
+        meta_responded = self.queue_request(request)
         proxy_class = ClassProxy(self.reactive, class_name, deferred=meta_responded)
         self._classes[class_name] = proxy_class
         return proxy_class
 
+    @reactive_func
     def createCollection(self, contains, collection_name=None, distributed=True):
         ''' Create a collection of reactive objects
 
@@ -73,6 +80,7 @@ class MetaProxy(ServiceProxy):
             Reference to the newly created collection; this probably should be
             a deferred / promise / future.
         '''
+        
         if collection_name in self._collections:
             return self._collections[collection_name]
         request = {
@@ -83,7 +91,13 @@ class MetaProxy(ServiceProxy):
                         'distributed' : distributed, 
                     }
         }
-        meta_responded = self._container.send_request(request)
+        print('About to send {0}'.format(request))
+        meta_responded = self.queue_request(request)
+        print('Sent request, got {0} back, creating CollectionProxy'.format(meta_responded))
         proxy_collection = CollectionProxy(self.reactive, collection_name, deferred=meta_responded)
         self._collections[collection_name] = proxy_collection
         return proxy_collection
+
+    def getCollection(self, collection_name):
+        #TODO This should be deferred
+        return self._collections[collection_name]

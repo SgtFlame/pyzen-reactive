@@ -89,12 +89,11 @@ class MetaService(Service):
             Mongo document representing the collection meta data (probably
             should be something else, but needs to be JSON serializable)
         '''
-        if class_name not in self._classes:
-            print('Creating class {0}'.format(class_name))
-            self._create_class(class_name, language, implementation)
-        class_data = self._classes[class_name]
-        print('Class: {0}, type({1})'.format(class_data, type(class_data)))
-        return class_data
+        if collection_name not in self._collections:
+            print('Creating collection {0}'.format(collection_name))
+            self._create_collection(contains, collection_name, distributed)
+        collection_data = self._collections[collection_name]
+        return collection_data
 
     def _create_class(self, class_name, language, implementation):
         class_data = {
@@ -120,6 +119,23 @@ class MetaService(Service):
         self._meta.save(class_data)
         print('Class: {0}, type({1})'.format(class_data, type(class_data)))
         #TODO This event should be published to listeners
+        return meta_event
+
+    def _create_collection(self, contains, collection_name, distributed):
+        #TODO The same things that need to be done for classes should be done
+        # for collections as well.
+        collection_data = {
+            'contains' : contains,
+            'collection_name' : collection_name,
+            'distributed' : distributed,
+        }
+        meta_event = {
+            'type' : 'collection_created',
+            'data' : collection_data,
+        }
+        self._collections[collection_name] = collection_data
+        self._meta_events.save(meta_event)
+        self._meta.save(collection_data)
         return meta_event
 
 # Main function that run this service in a standalone process

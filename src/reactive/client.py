@@ -7,16 +7,19 @@ from reactive.meta.proxy import MetaProxy
 class ReactiveClient(object):
 
     def __init__(self, stack_name, app_manager):
-        print('Initializing ReactiveClient')
         self._initialized = False
+        self._stack_name = stack_name
         self._app_manager = app_manager
+        
+    def init(self):
+        ''' Additional initialization '''
         # Proxy for the reactive server
-        self._server = ReactiveServerProxy(stack_name, app_manager.container)
+        self._server = ReactiveServerProxy(self._stack_name, self._app_manager.container)
         # Meta
-        self._meta = MetaProxy(stack_name, app_manager.container)
+        self._meta = MetaProxy(self._stack_name, self._app_manager)
         # Resolved attributes, generally service, collection, or object proxies
         self._resolved_attrs = {}
-        print('ReactiveClient initialized')
+        self._initialized = True
 
     @property
     def app_manager(self):
@@ -24,9 +27,7 @@ class ReactiveClient(object):
 
     @property
     def meta(self):
-        print('Getting meta')
         meta = self._meta
-        print('Got meta')
         return meta
 
     def disconnect(self):
@@ -56,6 +57,7 @@ class AppManager(object):
         self._container = ServiceContainer()
         self._container.init(srap=srap)
         self._reactive = ReactiveClient(stack_name, self)
+        self._reactive.init()
 
     @property
     def container(self):
@@ -63,7 +65,6 @@ class AppManager(object):
 
     @property
     def reactive(self):
-        print('Calling AppManager property reactive')
         return self._reactive
 
     def shutdown(self):
